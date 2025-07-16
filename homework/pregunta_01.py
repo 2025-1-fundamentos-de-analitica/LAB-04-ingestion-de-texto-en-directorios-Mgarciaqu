@@ -1,6 +1,11 @@
 # pylint: disable=import-outside-toplevel
 # pylint: disable=line-too-long
 # flake8: noqa
+
+import pandas as pd
+import os
+import zipfile
+
 """
 Escriba el codigo que ejecute la accion solicitada en cada pregunta.
 """
@@ -71,3 +76,32 @@ def pregunta_01():
 
 
     """
+    
+    with zipfile.ZipFile('files/input.zip', 'r') as z:
+        z.extractall('files')
+
+    input_dir = 'files/input'
+    output_dir = 'files/output'
+
+    os.makedirs(output_dir, exist_ok=True)
+
+    for data in ['train', 'test']:
+        
+        frases = []
+        etiquetas = []
+        
+        s_path = os.path.join(input_dir, data)
+        
+        for sent in ['negative', 'positive', 'neutral']:
+            
+            carpeta = os.path.join(s_path, sent)
+            
+            for file in os.listdir(carpeta):
+                filepath = os.path.join(carpeta, file)
+                
+                with open(filepath, encoding='utf-8') as f:
+                    frases.append(f.read().strip())
+                    etiquetas.append(sent)
+        
+        df = pd.DataFrame({'phrase': frases, 'target': etiquetas})
+        df.to_csv(os.path.join(output_dir, f'{data}_dataset.csv'), index=False)
